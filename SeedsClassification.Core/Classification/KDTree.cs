@@ -1,0 +1,108 @@
+﻿using SeedsClassification.Core.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace SeedsClassification.Core.Classification
+{
+    public class KDTree
+    {
+        public KDNode Root { get; private set; }
+
+        public void Construire(List<GrainBle> data)
+        {
+            Root = ConstruireRecursif(data, 0);
+        }
+
+        private KDNode ConstruireRecursif(List<GrainBle> points, int profondeur)
+        {
+            if (points == null || points.Count == 0)
+                return null;
+
+            int axe = profondeur % 7;
+
+            points = TrierSelonAxe(points, axe);
+
+            int medianIndex = points.Count / 2;
+
+            KDNode node = new KDNode(points[medianIndex]);
+
+            node.Left = ConstruireRecursif(points.Take(medianIndex).ToList(), profondeur + 1);
+            node.Right = ConstruireRecursif(points.Skip(medianIndex + 1).ToList(), profondeur + 1);
+
+            return node;
+        }
+
+        private List<GrainBle> TrierSelonAxe(List<GrainBle> liste, int axe)
+        {
+            for (int i = 1; i < liste.Count; i++)
+            {
+                GrainBle cle = liste[i];
+                double valeurCle = GetValeurSelonAxe(cle, axe);
+
+                int j = i - 1;
+
+                while (j >= 0 && GetValeurSelonAxe(liste[j], axe) > valeurCle)
+                {
+                    liste[j + 1] = liste[j];
+                    j--;
+                }
+
+                liste[j + 1] = cle;
+            }
+
+            return liste;
+        }
+
+        private double GetValeurSelonAxe(GrainBle g, int axe)
+        {
+            switch (axe)
+            {
+                case 0: return g.Area;
+                case 1: return g.Perimeter;
+                case 2: return g.Compactness;
+                case 3: return g.Length;
+                case 4: return g.Width;
+                case 5: return g.Asymmetry;
+                case 6: return g.GrooveLength;
+                default: throw new ArgumentException("Axe invalide");
+            }
+        }
+
+        private void ParcoursArbre(KDNode node, GrainBle cible, IDistance distance,
+                           List<(GrainBle grain, double dist)> liste)
+        {
+            if (node == null)
+                return;
+
+            double d = distance.Calculer(cible, node.Data);
+            liste.Add((node.Data, d));
+
+            ParcoursArbre(node.Left, cible, distance, liste);
+            ParcoursArbre(node.Right, cible, distance, liste);
+        }
+
+        public List<GrainBle> RechercherKPlusProches(GrainBle cible, int k, IDistance distance)
+        {
+            var liste = new List<(GrainBle grain, double dist)>();
+
+            ParcoursArbre(Root, cible, distance, liste);
+
+            for (int i = 1; i < liste.Count; i++)
+            {
+                var cle = liste[i];
+                int j = i - 1;
+
+                while (j >= 0 && liste[j].dist > cle.dist)
+                {
+                    liste[j + 1] = liste[j];
+                    j--;
+                }
+
+                liste[j + 1] = cle;
+            }
+
+            return liste.Take(k).Select(x => x.grain).ToList();
+        }
+    }
+}

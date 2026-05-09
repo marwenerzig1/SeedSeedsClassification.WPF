@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="SeedsClassification.Core/SeedsClassification.Core.csproj" Id="9dea016c-8d28-4462-a72d-cc7d0b30ebb5" />
+  <Project Path="SeedsClassification.WPF/SeedsClassification.WPF.csproj" Id="95efdcdd-5355-44fc-b469-0a352584db80" />
+</Solution>
