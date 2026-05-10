@@ -1,4 +1,4 @@
-"SeedSeedsClassification.WPF" 
+"*SeedSeedsClassification.WPF" 
 
 C# application combining Artificial Intelligence, MySQL database management, APIs, and a modern WPF interface to create an intelligent quality control system.
 The project integrates AI-based analysis, image processing, database management, and a user-friendly desktop interface for industrial inspection and defect detection.
